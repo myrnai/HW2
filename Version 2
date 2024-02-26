@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct Check{
+    int CheckNum;
+    string CheckMemo;
+    float CheckAmount;
+    ostream& operator<<(ostream& os) const{
+        os<<"Check #"<<CheckNum<<": "<<CheckMemo<<" - $"<<CheckAmount;
+        return os;
+    }
+    bool operator>(float amount) const{
+        return CheckAmount>amount;
+    }
+};
+
+class CheckBook{
+private:
+    float balance;
+    vector<Check> checks;
+    float lastDeposit;
+
+public:
+    CheckBook():balance(0),lastDeposit(0){}
+    CheckBook(float initialBalance):balance(initialBalance),lastDeposit(0) {}
+    float getBalance() const{return balance;}
+    void setBalance(float newBalance){balance=newBalance;}
+    void deposit(float amount){
+        balance+=amount;
+        lastDeposit=amount;
+    }
+    bool writeCheck(Check c_amount){
+        if (c_amount>balance){
+            cout<<"Insufficient funds to write a check."<<endl;
+            return false;
+        }
+        cout<<"Enter memo for the check: ";
+        cin>>c_amount.CheckMemo;
+        if (c_amount.CheckMemo.empty()){
+            string memos[]={"wedding", "baby shower", "pizza", "children hospital", "barber shop", "plumber",
+                              "hobbit", "trudo"};
+            int randomIndex=rand()%(sizeof(memos)/sizeof(memos[0]));
+            c_amount.CheckMemo=memos[randomIndex];
+        }
+        c_amount.CheckNum=checks.size()+1;
+        balance-=c_amount.CheckAmount;
+        checks.push_back(c_amount);
+        return true;
+    }
+    void displayChecks() const{
+        for (const auto& check:checks){
+        }
+    }
+};
+
+int main() {
+    CheckBook myCheckBook(1000.0);
+    myCheckBook.writeCheck({0, "", 100.0});  // Example check
+    myCheckBook.displayChecks();
+    return 0;
+}
