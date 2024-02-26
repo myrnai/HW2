@@ -1,0 +1,118 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Check {
+    int CheckNum;
+    string CheckMemo;
+    float CheckAmount;
+    ostream& operator<<(ostream& os) const{
+        os<<"Check #"<<CheckNum<<": "<<CheckMemo<<" - $"<<CheckAmount;
+        return os;
+    }
+    bool operator>(float amount) const{
+        return CheckAmount>amount;
+    }
+};
+
+class CheckBook{
+private:
+    float balance;
+    Check* chkPtr;
+    float lastDeposit;
+    int numOfChecks;
+    int checkBookSize;
+
+public:
+    CheckBook():balance(0),lastDeposit(0),numOfChecks(0),checkBookSize(4){
+        chkPtr=new Check[checkBookSize];
+    }
+    CheckBook(float initialBalance):balance(initialBalance),lastDeposit(0),numOfChecks(0),checkBookSize(2){
+        chkPtr=new Check[checkBookSize];
+    }
+    ~CheckBook(){
+        delete[] chkPtr;
+    }
+    CheckBook(const CheckBook& other){
+        balance=other.balance;
+        lastDeposit=other.lastDeposit;
+        numOfChecks=other.numOfChecks;
+        checkBookSize=other.checkBookSize;
+        chkPtr=new Check[checkBookSize];
+        for (int i=0; i<numOfChecks;++i){
+            chkPtr[i]=other.chkPtr[i];
+        }
+    }
+    CheckBook& operator=(const CheckBook& other){
+        if (this !=&other){
+            delete[] chkPtr;
+            balance=other.balance;
+            lastDeposit=other.lastDeposit;
+            numOfChecks=other.numOfChecks;
+            checkBookSize=other.checkBookSize;
+
+            chkPtr=new Check[checkBookSize];
+            for (int i=0;i<numOfChecks;++i){
+                chkPtr[i]=other.chkPtr[i];
+            }
+        }
+        return *this;
+    }
+    float getBalance() const{return balance;}
+    void setBalance(float newBalance){balance=newBalance;}
+    void deposit(float amount){
+        balance+=amount;
+        lastDeposit=amount;
+    }
+    bool writeCheck(Check c_amount){
+        if (c_amount > balance){
+            cout<<"Insufficient funds to write a check."<<endl;
+            return false;
+        }
+        if (numOfChecks==checkBookSize){
+            doubleCheckBookSize();
+            cout<<"Warning: New check book has been ordered."<<endl;
+        }
+        cout<<"Enter memo for the check: ";
+        cin>>c_amount.CheckMemo;
+        if (c_amount.CheckMemo.empty()){
+            string memos[]={"wedding", "baby shower", "pizza", "children hospital", "barber shop", "plumber", "hobbit", "trudo"};
+            int randomIndex=rand() % (sizeof(memos)/sizeof(memos[0]));
+            c_amount.CheckMemo=memos[randomIndex];
+        }
+        c_amount.CheckNum=++numOfChecks;
+        balance-=c_amount.CheckAmount;
+        chkPtr[numOfChecks-1]=c_amount;
+        return true;
+    }
+    void displayChecks() const{
+        for (int i=numOfChecks-1;i>=0;--i){
+            cout<<chkPtr<<endl;
+        }
+    }
+
+private:
+    void doubleCheckBookSize(){
+        Check*newChkPtr=new Check[2*checkBookSize];
+        for (int i=0;i<checkBookSize;++i){
+            newChkPtr[i]=chkPtr[i];
+        }
+        delete[] chkPtr;
+        chkPtr=newChkPtr;
+        checkBookSize*=2;
+    }
+};
+void checkTest(const CheckBook& checkBook,float initialBalance){
+    CheckBook testCheckBook(initialBalance);
+    while (testCheckBook.getBalance()>0){
+        Check newCheck;
+        newCheck.CheckAmount=rand()%100+1;
+        testCheckBook.writeCheck(newCheck);
+    }
+    testCheckBook.displayChecks();
+}
+int main(){
+    CheckBook myCheckBook(1000.0);
+    checkTest(myCheckBook, myCheckBook.getBalance());
+    return 0;
+}
